@@ -9,10 +9,12 @@ import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { debounce } from "lodash";
 
+import Loader from "./components/loader";
+
 const App = () => {
   const [query, setQuery] = useState({ q: "Karachi" });
   const [units, setUnits] = useState("metric");
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [weather, setWeather] = useState(null);
 
   function capitalizeFirstLetter(string) {
@@ -20,6 +22,7 @@ const App = () => {
   }
 
   const getWeather = async () => {
+    setLoading(true);
     const message = query.q
       ? `Fetching weather for ${capitalizeFirstLetter(query.q)}`
       : "Fetching weather for your location";
@@ -34,6 +37,7 @@ const App = () => {
         } 🎉`
       );
       setWeather(data);
+      setLoading(false);
     });
   };
 
@@ -57,23 +61,27 @@ const App = () => {
       : "from-yellow-500 to-orange-700";
   };
 
-  return (
-    <div
-      className={`inset-0 px-4 sm:px-8 md:px-16 lg:px-32 py-5 bg-gradient-to-br shadow-xl shadow-gray-400  ${formatBackground()}`}
-    >
-      <TopButtons setQuery={setQuery} />
-      <InputField setQuery={setQuery} setUnits={setUnits} />
-      {weather && (
-        <>
-          <TimeAndLocation weather={weather} />
-          <TempAndDetails weather={weather} units={units} />
-          <Forecast title="3-hour step Forecast" data={weather.hourly} />
-          <Forecast title="5-day step Forecast" data={weather.daily} />
-        </>
-      )}
+  return loading == true ? (
+    <Loader />
+  ) : (
+    <>
+      <div
+        className={`inset-0 px-4 sm:px-8 md:px-16 lg:px-32 py-5 bg-gradient-to-br shadow-xl shadow-gray-400  ${formatBackground()}`}
+      >
+        <TopButtons setQuery={setQuery} />
+        <InputField setQuery={setQuery} setUnits={setUnits} />
+        {weather && (
+          <>
+            <TimeAndLocation weather={weather} />
+            <TempAndDetails weather={weather} units={units} />
+            <Forecast title="3-hour step Forecast" data={weather.hourly} />
+            <Forecast title="5-day step Forecast" data={weather.daily} />
+          </>
+        )}
 
-      <ToastContainer autoClose={1500} theme="colored" />
-    </div>
+        <ToastContainer autoClose={1500} theme="colored" />
+      </div>
+    </>
   );
 };
 
